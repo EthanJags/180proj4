@@ -1,0 +1,462 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>CS 180 Project 3: Face Morphing</title>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+        <style>
+            :root {
+                --primary-color: #3498db;
+                --secondary-color: #2c3e50;
+                --background-color: #ecf0f1;
+                --text-color: #34495e;
+                --header-color: #2980b9;
+            }
+    
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+    
+            body {
+                font-family: 'Poppins', sans-serif;
+                line-height: 1.6;
+                color: var(--text-color);
+                background-color: var(--background-color);
+            }
+    
+            header {
+                background-color: var(--header-color);
+                color: white;
+                text-align: center;
+                padding: 2rem 0;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+    
+            header h1 {
+                font-size: 2.5rem;
+                font-weight: 600;
+            }
+    
+            #toc {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 250px;
+                height: 100vh;
+                overflow-y: auto;
+                background-color: var(--secondary-color);
+                padding: 2rem 1rem;
+                color: white;
+                transition: transform 0.3s ease-in-out;
+            }
+    
+            #toc h2 {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+                padding-bottom: 0.5rem;
+                border-bottom: 2px solid var(--primary-color);
+            }
+    
+            #toc ul {
+                list-style-type: none;
+            }
+    
+            #toc ul ul {
+                padding-left: 1rem;
+            }
+    
+            #toc a {
+                text-decoration: none;
+                color: #ecf0f1;
+                display: block;
+                padding: 0.5rem 0;
+                transition: color 0.3s ease;
+            }
+    
+            #toc a:hover {
+                color: var(--primary-color);
+            }
+    
+            main {
+                margin-left: 250px;
+                padding: 2rem;
+                max-width: 1200px;
+            }
+    
+            section {
+                background-color: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                padding: 2rem;
+                margin-bottom: 2rem;
+            }
+    
+            h2, h3 {
+                color: var(--primary-color);
+                margin-bottom: 1rem;
+            }
+    
+            h2 {
+                font-size: 2rem;
+                border-bottom: 2px solid var(--primary-color);
+                padding-bottom: 0.5rem;
+            }
+    
+            h3 {
+                font-size: 1.5rem;
+            }
+    
+            p {
+                margin-bottom: 1rem;
+            }
+    
+            .image-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1rem;
+                justify-content: center;
+                margin-top: 1rem;
+            }
+    
+            .image-item {
+                flex-basis: calc(25% - 1rem);
+                background-color: white;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+    
+            .image-item:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+    
+            .image-item img {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+    
+            .image-item p {
+                padding: 0.5rem;
+                text-align: center;
+                font-size: 0.9rem;
+            }
+    
+            footer {
+                background-color: var(--secondary-color);
+                color: white;
+                text-align: center;
+                padding: 1rem;
+                margin-top: 2rem;
+                margin-left: 250px;
+            }
+    
+            @media (max-width: 768px) {
+                #toc {
+                    transform: translateX(-100%);
+                }
+    
+                main, footer {
+                    margin-left: 0;
+                }
+    
+                .image-item {
+                    flex-basis: calc(50% - 1rem);
+                }
+            }
+    
+            #toc-toggle {
+                position: fixed;
+                left: 10px;
+                top: 10px;
+                z-index: 1000;
+                background-color: var(--primary-color);
+                color: white;
+                border: none;
+                padding: 0.5rem 1rem;
+                border-radius: 5px;
+                cursor: pointer;
+                display: none;
+            }
+    
+            @media (max-width: 768px) {
+                #toc-toggle {
+                    display: block;
+                }
+            }
+
+            .author-name {
+                font-size: 1.2em;
+                font-weight: bold;
+                color: var(--primary-color);
+                margin-top: 0.5em;
+                margin-bottom: 0.2em;
+                text-align: center;
+            }
+
+        </style>
+    
+</head>
+<body>
+    <nav id="toc">
+        <h2>Table of Contents</h2>
+        <ul id="toc-list"></ul>
+    </nav>
+    <header>
+        <h1>CS 180 Project 4: Stitching Photo Mosaics</h1>
+        
+        <p class="author-name">By Ethan Jagoda</p>
+    </header>
+    <main>
+        <section>
+            <h2>Introduction</h2>
+            <p>This project explores how to use homographic transformations to stitch together a photo mosaic. As well, we use homographic transformations to warp images to rectify shapes to seem like they are from a different point of view.
+            </p>
+
+            <h2>Raw Images Used</h2>
+            <p>These are some of the raw images I used in this project.</p>
+            <div class="image-container">
+                <div class="image-item">
+                    <img src="outputs/inputs/IMG_2814 (1).jpeg" alt="Berkeley Way West">
+                    <p>Berkeley Way West Bottom</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/inputs/IMG_2815.jpeg" alt="Berkeley Way West">
+                    <p>Berkeley Way West Top</p>
+                </div>
+            </div>
+            <div class="image-container">
+                <div class="image-item">
+                    <img src="outputs/inputs/IMG_2827.jpeg" alt="Pranav">
+                    <p>Pranav Left</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/inputs/IMG_2828.jpeg" alt="Pranav">
+                    <p>Pranav Right</p>
+                </div>
+            </div>
+            <div class="image-container">
+                <div class="image-item">
+                    <img src="outputs/inputs/IMG_2830.jpeg" alt="SF Skyline">
+                    <p>SF Skyline Left</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/inputs/IMG_2831.jpeg" alt="SF Skyline">
+                    <p>SF Skyline Right</p>
+                </div>
+            </div>
+            <h3>Recovering Correspondences</h3>
+            <p>I used a GUI to manually select correspondences between the two images. This was done by clicking on a point in one image and then clicking on the corresponding point in the other image.</p>
+            <p>This is an example of one of the images with the correspondences marked.</p>
+            <div class="image-container">
+                <div class="image-item">
+                    <img src="outputs/pranav_left_points.png" alt="Pranav Left Points">
+                    <p>Pranav Left Points</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/pranav_right_points.png" alt="Pranav Right Points">
+                    <p>Pranav Right Points</p>
+                </div>
+            </div>
+            <div class="image-container">
+                <div class="image-item">
+                    <img src="outputs/berkeley_way_west_anchor.png" alt="Berkeley Way West Anchor Points">
+                    <p>Berkeley Way West Bottom Points</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/berkeley_way_west_warped_points.png" alt="Berkeley Way West Target Points">
+                    <p>Berkeley Way West Top Points</p>
+                </div>
+            </div>
+            <h3>Computing the homographic transformation</h3>
+           <p>The homographic transformation is computed using the following equation:</p>
+           <div style="text-align: center; margin: 20px 0;">
+               <img src="https://latex.codecogs.com/svg.latex?\Large&space;Hp=p'" alt="Hp = p'" />
+           </div>
+           <p>Where H is the homography matrix, p is a point in the source image, and p' is the corresponding point in the destination image.</p>
+           <p>Expanding this out, we get the following equation:</p>
+           <div style="text-align: center; margin: 20px 0;">
+               <img src="https://latex.codecogs.com/svg.latex?\Large&space;\begin{bmatrix}a&b&c\\d&e&f\\g&h&1\end{bmatrix}\begin{bmatrix}x\\y\\1\end{bmatrix}=w\begin{bmatrix}x'\\y'\\1\end{bmatrix}" alt="Homographic transformation matrix equation" />
+           </div>
+           <p>Expanding this out further, we get the following equations:</p>
+           <div style="text-align: center; margin: 20px 0;">
+               <img src="https://latex.codecogs.com/svg.latex?\Large&space;wx'=ax+by+c" alt="Homographic transformation equations" />
+            </div>
+            <div style="text-align: center; margin: 20px 0;">
+               <img src="https://latex.codecogs.com/svg.latex?\Large&space;wy'=dx+ey+f" alt="Homographic transformation equations" />
+            </div>
+            <div style="text-align: center; margin: 20px 0;">
+               <img src="https://latex.codecogs.com/svg.latex?\Large&space;w=gx+hy+1" alt="Homographic transformation equations" />
+            </div>
+            <p>Reframing this so that we can use the new points and old points to solve for the homography matrix, we get the following equations:</p>
+            <div style="text-align: center; margin: 20px 0;">
+                <img src="https://latex.codecogs.com/svg.latex?\Large&space;\left[\begin{array}{cccccccc}x&y&1&0&0&0&-xx'&-yx'\\0&0&0&x&y&1&-xy'&-yy'\end{array}\right]\begin{bmatrix}a\\b\\c\\d\\e\\f\\g\\h\end{bmatrix}=\begin{bmatrix}x'\\y'\end{bmatrix}" alt="Homography matrix" />
+            </div>
+            <p>To reduce the chance of overfitting, we can use more than 4 points and then solve this system of equations using least squares to get the homography matrix.</p>
+            <h3>Warped Images</h3>
+            <p>Here are some of the warped images I got from this technique.</p>
+            <div class="image-container">
+                <div class="image-item">
+                    <img src="outputs/anchorImage_warpedImage_anchor_in_canvas.jpg" alt="Berkeley Way West Top Warped into Bottom">
+                    <p>Berkeley Way West Top</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/warpedImage_anchorImage_warped_in_canvas.jpg" alt="Berkeley Way West Bottom Warped into Top">
+                    <p>Berkeley Way West Bottom Warped into Top</p>
+                </div>
+            </div>
+            <div class="image-container">
+                <div class="image-item">
+                    <img src="outputs/IMG_2827_IMG_2828_anchor_in_canvas.jpg" alt="Average Face Warped into Ethan">
+                    <p>Pranav Left</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/IMG_2828_IMG_2827_warped_in_canvas.jpg" alt="Ethan Warped into Average Face">
+                    <p>Pranav Right Warped into Left</p>
+                </div>
+            </div>
+            <div class="image-container">   
+                <div class="image-item">
+                    <img src="outputs/IMG_2830_IMG_2831_anchor_in_canvas.jpg" alt="SF Skyline Left">
+                    <p>SF Skyline Left</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/IMG_2831_IMG_2830_warped_in_canvas.jpg" alt="SF Skyline Right">
+                    <p>SF Skyline Right Warped into Left</p>
+                </div>
+            </div>
+            <h3>Blending Images</h3>
+            <p>To blend the images, we create a mask that is the same size and shape as the warped images. Then, to ensure a smooth transition, we use a dissolve factor that changes linearly with the distance from an images edge from 0 to 1. We then use this mask to blend the pixels of the two warped images together, normalizing the pixels by the mask so that the brightnesses are correct.</p>
+            <p>Here are some of the blended images and the corresponding masks I got from this technique.</p>
+            <p>Berkeley Way West</p>
+            <div class="image-container">
+                <div class="image-item">
+                    <img src="outputs/anchorImage_warpedImage_anchor_alpha_mask.jpg" alt="Anchor Alpha Mask">
+                    <p>Anchor Alpha Mask</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/warpedImage_anchorImage_warped_alpha_mask.jpg" alt="Warped Alpha Mask">
+                    <p>Warped Alpha Mask</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/_blended.jpg" alt="Blended Images">
+                    <p>Blended Images</p>
+                </div>
+            </div>
+            <p>Pranav</p>
+            <div class="image-container">
+                <div class="image-item">
+                    <img src="outputs/IMG_2827_IMG_2828_anchor_alpha_mask.jpg" alt="Anchor Alpha Mask">
+                    <p>Anchor Alpha Mask</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/IMG_2828_IMG_2827_warped_alpha_mask.jpg" alt="Warped Alpha Mask">
+                    <p>Warped Alpha Mask</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/IMG_2827_IMG_2828_blended.jpg" alt="Blended Images">
+                    <p>Blended Images</p>
+                </div>
+            </div>
+            <p>SF Skyline</p>
+            <div class="image-container">
+                <div class="image-item">
+                    <img src="outputs/IMG_2830_IMG_2831_anchor_alpha_mask.jpg" alt="Anchor Alpha Mask">
+                    <p>Anchor Alpha Mask</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/IMG_2831_IMG_2830_warped_alpha_mask.jpg" alt="Warped Alpha Mask">
+                    <p>Warped Alpha Mask</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/IMG_2830_IMG_2831_blended.jpg" alt="Blended Images">
+                    <p>Blended Images</p>
+                </div>
+            </div>
+            <h3>Rectifying Images</h3>
+            <p>To rectify images, we can use the homography matrix to warp the image to a new point of view. This is useful for things like correcting perspective shift in photos.</p>
+            <p>Here are some of the rectified images I got from this technique.</p>
+            <div class="image-container">
+                <div class="image-item">
+                    <img src="outputs/tiles.jpeg" alt="Original Image">
+                    <p>Original Tiles</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/tiles_with_points.png" alt="Original Points">
+                    <p>Original Tile Points</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/tiles_target_poitns.png" alt="Rectified Points">
+                    <p>Target Tile Points</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/tiles_rect.png" alt="Rectified Images">
+                    <p>Rectified Tiles</p>
+                </div>
+            </div>
+            <div class="image-container">
+                <div class="image-item">
+                    <img src="outputs/pres.jpeg" alt="Original Image">
+                    <p>Original Presentation Screen</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/pres_with_points.png" alt="Original Points">
+                    <p>Original Presentation Screen Points</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/pres_canvas_points.png" alt="Rectified Points">
+                    <p>Target Presentation Screen Points</p>
+                </div>
+                <div class="image-item">
+                    <img src="outputs/pres_rect.png" alt="Rectified Images">
+                    <p>Rectified Presentation Screen</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>2024 Ethan Jagoda - CS180 Project 4</p>
+    </footer>
+    <script>
+        // JavaScript to generate the table of contents
+        document.addEventListener('DOMContentLoaded', function() {
+            const tocList = document.getElementById('toc-list');
+            const headers = document.querySelectorAll('h2, h3');
+            
+            headers.forEach(function(header, index) {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                
+                // Create an id for the header if it doesn't have one
+                if (!header.id) {
+                    header.id = 'toc-' + index;
+                }
+                
+                a.href = '#' + header.id;
+                a.textContent = header.textContent;
+                
+                li.appendChild(a);
+                
+                if (header.tagName === 'H2') {
+                    tocList.appendChild(li);
+                } else if (header.tagName === 'H3') {
+                    let lastH2Li = tocList.lastElementChild;
+                    let ul = lastH2Li.querySelector('ul');
+                    if (!ul) {
+                        ul = document.createElement('ul');
+                        lastH2Li.appendChild(ul);
+                    }
+                    ul.appendChild(li);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
